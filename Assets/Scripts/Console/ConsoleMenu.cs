@@ -2,29 +2,19 @@ using UnityEngine;
 
 public class ConsoleMenu : MonoBehaviour
 {
-    //Console Menu
-    //Static Instance?
-    //Input
-    //Drawing GUI
-
-    //GUI Logger
-    //Logging previous Messages
-    //Drawing Messages
-
     bool _consoleToggle = false;
 
     string _input;
-    string _message = "";
+    public string Message { get; set; } = "";
 
-    //float currentScreenWidth;
-    //float currentScreenHeight;
+    UtilityCommands initCommands;
 
     //Figure how to scale GUI
-    /*void UpdateScreenResoltion()
+
+    void OnEnable()
     {
-        currentScreenWidth = Screen.currentResolution.width;
-        currentScreenHeight = Screen.currentResolution.height;
-    }*/
+        initCommands = new UtilityCommands();
+    }
 
     void OnGUI()
     {
@@ -44,13 +34,15 @@ public class ConsoleMenu : MonoBehaviour
         _input = GUI.TextField(new Rect(0, 0, Screen.width - 320f, 20f), _input);
         GUI.FocusControl("ConsoleInput");
 
-
-        GUI.Label(new Rect(5, Screen.height - 20, Screen.width - 20f, 20f), _message);
+        GUI.color = Color.black;
+        GUI.Label(new Rect(5, Screen.height - 20, Screen.width - 20f, 20f), Message);
+        GUI.color = Color.white;
     }
 
     void CheckInput()
     {
-        _message = "No Command Found";
+        CommandManager.ParseCommand(_input);
+        Message = CommandManager.LastCommand?.Description;
         _input = "";
     }
 
