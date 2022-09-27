@@ -9,8 +9,12 @@ public class AddCommandAttribute : PropertyAttribute
     {
         this._command = commandName;
         this._commandDescription = commandDescription;
-        new ConsoleCommand(commandName, commandDescription);
+        //TryGetCommand();
     }
 
-    //Add to a list of Commands
+    /*void TryGetCommand()
+    {
+        if(!CommandManager.Commands.ContainsKey(_command))
+            new ConsoleCommand(_command, _commandDescription);
+    }*/
 }
