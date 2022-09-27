@@ -1,0 +1,7 @@
+{
+  "name": "com.ac.runtime-console",
+  "version": "1.0.0",
+  "displayName": "Runtime Console",
+  "description": "a tool that calls allows users to run code through a command line.",
+  "unity": "2021.3"
+}

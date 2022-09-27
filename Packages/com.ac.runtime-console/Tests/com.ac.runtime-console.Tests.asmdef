@@ -1,0 +1,16 @@
+{
+    "name": "com.ac.runtime-console.tests",
+    "rootNamespace": "",
+    "references": [
+        "GUID:603c99d4b43a1a94fb571ed6b1a8e654"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

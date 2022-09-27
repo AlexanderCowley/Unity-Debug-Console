@@ -1,8 +1,9 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
+using RuntimeDebugger.Commands;
 public class SetTextTest : MonoBehaviour
 {
-    TextMeshProUGUI _text;
+    Text _text;
 
     void OnEnable()
     {
@@ -13,22 +14,22 @@ public class SetTextTest : MonoBehaviour
 
     void Awake()
     {
-        _text = GetComponent<TextMeshProUGUI>();
-        _text.SetText("Hi");
+        _text = GetComponent<Text>();
+        _text.text = "Hi";
     }
 
     void Scream()
     {
-        _text.SetText("AHHHHHHHHH");
+        _text.text = "AHHHHHHHHH";
     }
 
     void IntToText(int number)
     {
-        _text.SetText(number.ToString());
+        _text.text = number.ToString();
     }
 
     void SetTextTo(string message)
     {
-        _text.SetText(message);
+        _text.text = message;
     }
 }

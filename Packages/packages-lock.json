@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.ac.runtime-console": {
+      "version": "file:com.ac.runtime-console",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.collab-proxy": {
       "version": "1.17.1",
       "depth": 0,
