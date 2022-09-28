@@ -62,7 +62,11 @@ namespace RuntimeDebugger.Console
         void CheckInput()
         {
             CommandManager.ParseCommand(_input);
+
+            #if !UNITY_EDITOR
             ConsoleLogger.Log(_input);
+            #endif
+
             Message = CommandManager.LastCommand?.Description;
             _input = "";
         }
