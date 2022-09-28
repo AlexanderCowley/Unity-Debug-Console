@@ -9,8 +9,5 @@ public class AddCommandAttribute : PropertyAttribute
     {
         this._command = commandName;
         this._commandDescription = commandDescription;
-        new ConsoleCommand(commandName, commandDescription);
     }
-
-    //Add to a list of Commands
 }
