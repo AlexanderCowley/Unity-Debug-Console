@@ -56,7 +56,8 @@ namespace RuntimeDebugger.Commands
             if (!Commands.ContainsKey(inputProperties[0]))
             {
 #if !UNITY_EDITOR
-                //Console History Log
+                CommandErrorLog.WriteToLog($"Command: {commandTitle} does not exist.");
+                CommandErrorLog.WriteToLog($"Type help for a list of available commands.");
 #endif
                 return;
             }
