@@ -27,7 +27,6 @@ namespace RuntimeDebugger.Commands
                 #endif
                 return;
             }
-
             new ConsoleCommand(commandTitle, commandDescription, command);
         }
 
@@ -56,7 +55,7 @@ namespace RuntimeDebugger.Commands
             if (!Commands.ContainsKey(inputProperties[0]))
             {
 #if !UNITY_EDITOR
-                CommandErrorLog.WriteToLog($"Command: {commandTitle} does not exist.");
+                CommandErrorLog.WriteToLog($"Command: {inputProperties[0]} does not exist.");
                 CommandErrorLog.WriteToLog($"Type help for a list of available commands.");
 #endif
                 return;
