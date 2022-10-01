@@ -2,14 +2,14 @@ using UnityEngine;
 
 namespace RuntimeDebugger.Commands
 {
-    public class UtilityCommands
+    public static class UtilityCommands
     {
-        public UtilityCommands()
+        public static void AddDefaultCommands()
         {
             CommandManager.AddCommand("help", "displays all commands", Help);
         }
 
-        void Help()
+        static void Help()
         {
             Debug.Log("Display stuff");
             //List all commands;
