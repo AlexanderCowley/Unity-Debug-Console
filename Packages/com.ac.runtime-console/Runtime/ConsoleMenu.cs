@@ -1,12 +1,15 @@
 using UnityEngine;
 using RuntimeDebugger.Commands;
-using ConsoleLogger = RuntimeDebugger.Log.ConsoleLogger;
+#if !UNITY_EDITOR
+using RuntimeDebugger.Log;
+#endif
 
 namespace RuntimeDebugger.Console
 {
     public class ConsoleMenu : MonoBehaviour
     {
         bool _consoleToggle = false;
+        static bool _shutDown = false;
 
         string _input;
         public string Message { get; set; } = string.Empty;
@@ -14,9 +17,36 @@ namespace RuntimeDebugger.Console
         float _nativeWidth = 1920;
         float _nativeHeight = 1080;
 
-        UtilityCommands initCommands;
+        public static ConsoleMenu _instance;
+        public static ConsoleMenu MenuInstance
+        {
+            get
+            {
+                if (_shutDown)
+                {
+                    Debug.LogWarning("Console Menu Instance already destroyed. " +
+                        "Returning null.");
+                    return null;
+                }
 
-        void OnEnable() => initCommands = new UtilityCommands();
+                if(_instance == null)
+                {
+                    _instance = FindObjectOfType<ConsoleMenu>();
+
+                    //In case FindObjectOfType does not find it
+                    if(_instance == null)
+                    {
+                        var menuObject = new GameObject();
+                        _instance = menuObject.AddComponent<ConsoleMenu>();
+                        menuObject.name = _instance.ToString() + " (Singleton)";
+                        DontDestroyOnLoad(menuObject);
+                    }
+                }
+                return _instance;
+            }
+        }
+
+        void OnEnable() => UtilityCommands.AddDefaultCommands();
 
         void OnGUI()
         {
@@ -57,9 +87,9 @@ namespace RuntimeDebugger.Console
         {
             CommandManager.ParseCommand(_input);
 
-            #if !UNITY_EDITOR
+#if !UNITY_EDITOR
             ConsoleLogger.Log(_input);
-            #endif
+#endif
 
             Message = CommandManager.LastCommand?.Description;
             _input = "";
@@ -70,6 +100,10 @@ namespace RuntimeDebugger.Console
             if (Input.GetKeyDown(KeyCode.BackQuote))
                 _consoleToggle = !_consoleToggle;
         }
+
+        void OnDestroy() => _shutDown = true;
+
+        void OnApplicationQuit() => _shutDown = true;
     }
 
 }
