@@ -61,6 +61,7 @@ namespace RuntimeDebugger.Commands
                 return;
             }
             Commands[inputProperties[0]]?.ProcessArgs(inputProperties);
+            LastCommand = Commands[inputProperties[0]];
         }
     }
 }
