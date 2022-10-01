@@ -11,26 +11,12 @@ namespace RuntimeDebugger.Console
         string _input;
         public string Message { get; set; } = string.Empty;
 
-        Resolution screenResolution;
-        Matrix4x4 savedMatrix;
-        float xScreenSize = 1920;
-        float yScreenSize = 1080;
-        float GUIRatioX;
-        float GUIRatioY;
-        Vector3 scaleFactor;
+        float _nativeWidth = 1920;
+        float _nativeHeight = 1080;
 
         UtilityCommands initCommands;
 
-        //Figure how to scale GUI
-
-        void OnEnable()
-        {
-            initCommands = new UtilityCommands();
-
-            GUIRatioX = Screen.width / xScreenSize;
-            GUIRatioY = Screen.height / yScreenSize;
-            scaleFactor = new Vector3(GUIRatioX, GUIRatioY, 1);
-        }
+        void OnEnable() => initCommands = new UtilityCommands();
 
         void OnGUI()
         {
@@ -43,19 +29,27 @@ namespace RuntimeDebugger.Console
             if (Event.current.Equals(Event.KeyboardEvent("backquote")))
                 _consoleToggle = !_consoleToggle;
 
-            GUI.matrix = Matrix4x4.TRS(new Vector3(scaleFactor.x, scaleFactor.y, 1),
-        Quaternion.identity, scaleFactor);
+            float rx = Screen.width / _nativeWidth;
+            float ry = Screen.height / _nativeHeight;
+            // Scale width the same as height - cut off edges to keep ratio the same
+            GUI.matrix = Matrix4x4.TRS(new Vector3(0, 0, 0), Quaternion.identity, new Vector3(ry, ry, 1));
+            // Get width taking into account edges being cut off or extended
+            float adjustedWidth = _nativeWidth * (rx / ry);
 
-            GUI.Box(new Rect(0, 0, Screen.width / 4, Screen.height / 22), "");
-            GUI.backgroundColor = new Color(0, 0, 0, 0);
+            using (var horizontal = new GUILayout.HorizontalScope())
+            {
+                GUI.Box(new Rect(0, 0, adjustedWidth / 4, _nativeHeight / 22), "");
+                GUI.backgroundColor = new Color(0, 0, 0, 0);
 
-            GUI.SetNextControlName("ConsoleInput");
-            GUI.skin.textField.fontSize = Screen.width / 60;
-            _input = GUI.TextField(new Rect(0, 0, Screen.width / 4, Screen.height / 22), _input);
-            GUI.FocusControl("ConsoleInput");
+                GUI.SetNextControlName("ConsoleInput");
+                GUI.skin.textField.fontSize = (int)_nativeWidth / 60;
+                _input = GUI.TextField(new Rect(0, 0, adjustedWidth / 4, _nativeHeight / 22), _input);
+                GUI.FocusControl("ConsoleInput");
+            }
 
             GUI.color = Color.black;
-            GUI.Label(new Rect(5, Screen.height - 20, Screen.width / 4, Screen.height / 22), Message);
+            GUI.skin.label.fontSize = (int)_nativeWidth / 45;
+            GUI.Label(new Rect(5, _nativeHeight - _nativeHeight/10, adjustedWidth / 4, _nativeHeight / 22), Message);
             GUI.color = Color.white;
         }
 
