@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace RuntimeDebugger.Commands
 {
+    /*
+    The Command Manager stores a dictionary of commands that can be matched to call an action delegate stored in
+    A command object
+    */
     public static class CommandManager
     {
         public static Dictionary<string, IConsoleCommand> Commands = new Dictionary<string, IConsoleCommand>();
