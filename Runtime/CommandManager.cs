@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 namespace RuntimeDebugger.Commands
 {
-    /*
-    The Command Manager stores a dictionary of commands that can be matched to call an action delegate stored in
-    A command object
-    */
+    /// <summary>
+    /// The Command Manager stores a dictionary of commands that can be matched
+    /// to call an action delegate stored in a command object.
+    /// </summary>
     public static class CommandManager
     {
         public static Dictionary<string, IConsoleCommand> Commands = new Dictionary<string, IConsoleCommand>();
-        #if !UNITY_EDITOR
+#if !UNITY_EDITOR
         public static LogHandler CommandLog = new LogHandler("RuntimeConsoleLogs", "CommandList", ".txt", "Command Log");
         public static LogHandler CommandErrorLog = new LogHandler
             ("RuntimeConsoleLogs", "CommandErrors", ".txt", "Command Errors");
-        #endif
+#endif
         public static IConsoleCommand LastCommand { get; private set; }
 
         public static void AddCommand(string commandTitle, string commandDescription, Action command)
