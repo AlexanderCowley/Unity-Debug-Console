@@ -18,6 +18,8 @@ namespace RuntimeDebugger.Commands
 #endif
         public static IConsoleCommand LastCommand { get; private set; }
 
+        public static List<string> InputCommandLogs = new List<string>();
+
         public static void AddCommand(string commandTitle, string commandDescription, Action command)
         {
             if (Commands.ContainsKey(commandTitle))

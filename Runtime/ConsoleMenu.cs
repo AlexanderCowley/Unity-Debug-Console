@@ -15,6 +15,12 @@ namespace RuntimeDebugger.Console
         //Console Activation var
         bool _consoleToggle = false;
 
+        //Console GUI
+        Rect _consoleRect;
+        float consoleWidthScalar = 6.8f;
+        float _viewCount = 15f;
+        Vector2 ScrollPos = Vector2.zero;
+
         //Resolution vars
         float _nativeWidth = 1920;
         float _nativeHeight = 1080;
@@ -26,7 +32,7 @@ namespace RuntimeDebugger.Console
 
         //Singleton Instance vars
         static bool _shutDown = false;
-        public static ConsoleMenu _instance;
+        static ConsoleMenu _instance;
         public static ConsoleMenu MenuInstance
         {
             get
@@ -67,6 +73,11 @@ namespace RuntimeDebugger.Console
 
             using (var horizontal = new GUILayout.HorizontalScope())
             {
+                using(var vertical = new GUILayout.VerticalScope())
+                {
+                    //Draws the console log
+                    DrawConsoleLog();
+                }
                 //Draws console and text field
                 DrawConsole();
             }
@@ -80,9 +91,11 @@ namespace RuntimeDebugger.Console
         //Checks updates based on GUI Interactions
         void CheckConsoleInput()
         {
+            //Checks the enter key to enter in current input
             if (Event.current.Equals(Event.KeyboardEvent("return")))
                 CheckInput();
 
+            //Toggles console's active state
             if (Event.current.Equals(Event.KeyboardEvent("backquote")))
                 _consoleToggle = !_consoleToggle;
         }
@@ -97,6 +110,7 @@ namespace RuntimeDebugger.Console
 #endif
 
             Message = CommandManager.LastCommand?.Description;
+            CommandManager.InputCommandLogs.Add(_input);
             _input = "";
         }
 
@@ -116,9 +130,40 @@ namespace RuntimeDebugger.Console
         void DrawConsole()
         {
             //Draw Console
-            GUI.Box(new Rect(0, 0, _adjustedWidth / 4, _nativeHeight / 22), "");
+            _consoleRect = new Rect(0, _adjustedWidth / consoleWidthScalar,
+            _adjustedWidth / 3, _nativeHeight / 22);
+            GUI.Box(_consoleRect, "");
             GUI.backgroundColor = new Color(0, 0, 0, 0);
             HandleTextfield();
+        }
+
+        void DrawConsoleLog()
+        {
+            int logCount = CommandManager.InputCommandLogs.Count;
+            Rect consoleLogRect = new Rect(0, 0, _adjustedWidth / 3, _nativeHeight / 4);
+            GUI.Box(consoleLogRect, "");
+            
+            Rect scrollViewRect = new Rect(3, 6,
+            _adjustedWidth / 3, _nativeHeight / 4.2f);
+            
+            Rect viewRect = new Rect(4, 4, _adjustedWidth / 26, 
+            (_nativeHeight / 10) * logCount);
+            
+            ScrollPos = GUI.BeginScrollView(consoleLogRect, ScrollPos, viewRect);
+            
+            GUI.skin.label.fontSize = (int)_nativeWidth / 62;
+            //calculates scroll position by dividing the scroll position by the font size
+            int firstIndex = (int)ScrollPos.y / GUI.skin.label.fontSize;
+            Rect labelRect = new Rect(8, (firstIndex * 18f), 
+            _adjustedWidth / 6, _nativeHeight / 22);
+            //Draw each input element
+            for(int i = firstIndex; i < Mathf.Min
+            (logCount, firstIndex + _viewCount); i++)
+            {
+                GUI.Label(labelRect, CommandManager.InputCommandLogs[i]);
+                labelRect.y += 36;
+            }
+            GUI.EndScrollView();
         }
 
         //Handles the creation, focus of the textfield and assigns input
@@ -129,7 +174,8 @@ namespace RuntimeDebugger.Console
             GUI.skin.textField.fontSize = (int)_nativeWidth / 60;
 
             //Assigns input
-            _input = GUI.TextField(new Rect(0, 0, _adjustedWidth / 4, _nativeHeight / 22), _input);
+            _input = GUI.TextField(new Rect(0, _adjustedWidth / consoleWidthScalar,
+            _adjustedWidth / 3, _nativeHeight / 8), _input);
             GUI.FocusControl("ConsoleInput");
         }
 
