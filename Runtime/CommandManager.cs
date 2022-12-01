@@ -10,9 +10,11 @@ namespace RuntimeDebugger.Commands
     /// </summary>
     public static class CommandManager
     {
-        public static Dictionary<string, IConsoleCommand> Commands = new Dictionary<string, IConsoleCommand>();
+        public static Dictionary<string, IConsoleCommand> Commands = 
+            new Dictionary<string, IConsoleCommand>();
 #if !UNITY_EDITOR
-        public static LogHandler CommandLog = new LogHandler("RuntimeConsoleLogs", "CommandList", ".txt", "Command Log");
+        public static LogHandler CommandLog = new LogHandler
+        ("RuntimeConsoleLogs", "CommandList", ".txt", "Command Log");
         public static LogHandler CommandErrorLog = new LogHandler
             ("RuntimeConsoleLogs", "CommandErrors", ".txt", "Command Errors");
 #endif
