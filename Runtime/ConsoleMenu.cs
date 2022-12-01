@@ -21,6 +21,12 @@ namespace RuntimeDebugger.Console
         float _viewCount = 15f;
         Vector2 ScrollPos = Vector2.zero;
 
+        //Declares GUIStyle for console log items
+        GUIStyle _logStyle = new GUIStyle();
+        GUIContent _logContent = new GUIContent();
+
+        float _labelHeaderOffset = 12f;
+
         //Resolution vars
         float _nativeWidth = 1920;
         float _nativeHeight = 1080;
@@ -62,7 +68,14 @@ namespace RuntimeDebugger.Console
         }
         
         //Initalizes default commands objects
-        void OnEnable() => UtilityCommands.AddDefaultCommands();
+        void OnEnable()
+        {
+            UtilityCommands.AddDefaultCommands();
+
+            //Console Log Item Style Settings
+            _logStyle.wordWrap = true;
+            _logStyle.normal.textColor = Color.white;
+        } 
 
         void OnGUI()
         {
@@ -82,7 +95,7 @@ namespace RuntimeDebugger.Console
                 DrawConsole();
             }
 
-            //Draws the message using a command
+            //Draws the description of the last command called
             DrawCommandMessage();
             //Resets the default GUI Color
             GUI.color = Color.white;
@@ -103,14 +116,15 @@ namespace RuntimeDebugger.Console
         //Enters input from textfield to command manager then logs and clears input
         void CheckInput()
         {
-            CommandManager.ParseCommand(_input);
-
 #if !UNITY_EDITOR
             ConsoleLogger.Log(_input);
 #endif
 
             Message = CommandManager.LastCommand?.Description;
+            //Adds input to log
             CommandManager.InputCommandLogs.Add(_input);
+            //parses input for command manager to handle
+            CommandManager.ParseCommand(_input);
             _input = "";
         }
 
@@ -151,17 +165,19 @@ namespace RuntimeDebugger.Console
             
             ScrollPos = GUI.BeginScrollView(consoleLogRect, ScrollPos, viewRect);
             
-            GUI.skin.label.fontSize = (int)_nativeWidth / 62;
+            _logStyle.fontSize = (int)_nativeWidth / 62;
             //calculates scroll position by dividing the scroll position by the font size
-            int firstIndex = (int)ScrollPos.y / GUI.skin.label.fontSize;
-            Rect labelRect = new Rect(8, (firstIndex * 18f), 
-            _adjustedWidth / 6, _nativeHeight / 22);
+            int firstIndex = (int)ScrollPos.y / _logStyle.fontSize;
+            Rect labelRect = new Rect(24, (firstIndex * 18f) + (viewRect.y + _labelHeaderOffset), 
+            _adjustedWidth / 3, _nativeHeight / 22);
+            GUI.skin.label.wordWrap = true;
+            GUI.skin.label.fontSize = (int)_nativeWidth / 62;
             //Draw each input element
             for(int i = firstIndex; i < Mathf.Min
             (logCount, firstIndex + _viewCount); i++)
             {
                 GUI.Label(labelRect, CommandManager.InputCommandLogs[i]);
-                labelRect.y += 36;
+                labelRect.y += labelRect.height + 6;
             }
             GUI.EndScrollView();
         }
