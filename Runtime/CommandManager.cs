@@ -39,7 +39,7 @@ namespace RuntimeDebugger.Commands
         }
 
         public static void AddCommand<T>(string commandTitle, string commandDescription,
-            Action<T> command) where T : IConvertible
+            Action<T> command, object sender) where T : IConvertible
         {
             if (Commands.ContainsKey(commandTitle))
             {
@@ -49,7 +49,35 @@ namespace RuntimeDebugger.Commands
                 return;
             }
 
-            new ConsoleCommand<T>(commandTitle, commandDescription, command);
+            new ConsoleCommand<T>(commandTitle, commandDescription, command, sender);
+        }
+
+        public static void AddCommand<T>(string commandTitle, string commandDescription,
+            Action<T,T> command, object sender) where T : IConvertible
+        {
+            if (Commands.ContainsKey(commandTitle))
+            {
+#if !UNITY_EDITOR
+                CommandErrorLog.WriteToLog($"{commandTitle} already exists as an existing command");
+#endif
+                return;
+            }
+
+            new ConsoleCommand<T>(commandTitle, commandDescription, command, sender);
+        }
+
+        public static void AddCommand<T>(string commandTitle, string commandDescription,
+            Action<T,T,T> command, object sender) where T : IConvertible
+        {
+            if (Commands.ContainsKey(commandTitle))
+            {
+#if !UNITY_EDITOR
+                CommandErrorLog.WriteToLog($"{commandTitle} already exists as an existing command");
+#endif
+                return;
+            }
+
+            new ConsoleCommand<T>(commandTitle, commandDescription, command, sender);
         }
 
         public static void ParseCommand(string input)
