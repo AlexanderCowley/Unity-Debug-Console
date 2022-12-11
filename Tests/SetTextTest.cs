@@ -8,8 +8,8 @@ public class SetTextTest : MonoBehaviour
     void OnEnable()
     {
         CommandManager.AddCommand("scream", "changes text to scream", Scream);
-        CommandManager.AddCommand<int>("inttest", "test numbers", IntToText);
-        CommandManager.AddCommand<string>("settext", "test strings", SetTextTo);
+        CommandManager.AddCommand<int>("inttest", "test numbers", IntToText, this);
+        CommandManager.AddCommand<string>("settext", "test strings", SetTextTo, this);
     }
 
     void Awake()
