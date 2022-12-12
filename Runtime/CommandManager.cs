@@ -43,6 +43,11 @@ namespace RuntimeDebugger.Commands
         {
             if (Commands.ContainsKey(commandTitle))
             {
+
+#if UNITY_EDITOR
+                Debug.LogWarning($"{commandTitle} is already an existing command");
+#endif
+
 #if !UNITY_EDITOR
                 CommandErrorLog.WriteToLog($"{commandTitle} already exists as an existing command");
 #endif
@@ -62,10 +67,8 @@ namespace RuntimeDebugger.Commands
             //Log the Error to User
             if (!Commands.ContainsKey(inputProperties[0]))
             {
-#if !UNITY_EDITOR
-                CommandErrorLog.WriteToLog($"Command: {inputProperties[0]} does not exist.");
-                CommandErrorLog.WriteToLog($"Type help for a list of available commands.");
-#endif
+                InputCommandLogs.Add($"Command: {inputProperties[0]} does not exist.");
+                InputCommandLogs.Add($"Type help for a list of available commands.");
                 return;
             }
             Commands[inputProperties[0]]?.ProcessArgs(inputProperties);
