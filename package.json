@@ -1,6 +1,6 @@
 {
   "name": "com.sunny-tools.runtime-console",
-  "version": "1.3.1",
+  "version": "1.3.3",
   "displayName": "Runtime Console",
   "description": "A tool that allows users to test code in a build through a command line.",
   "unity": "2021.3",
