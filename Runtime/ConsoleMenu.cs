@@ -116,15 +116,11 @@ namespace RuntimeDebugger.Console
         //Enters input from textfield to command manager then logs and clears input
         void CheckInput()
         {
-#if !UNITY_EDITOR
-            ConsoleLogger.Log(_input);
-#endif
-
-            Message = CommandManager.LastCommand?.Description;
             //Adds input to log
             CommandManager.InputCommandLogs.Add(_input);
             //parses input for command manager to handle
             CommandManager.ParseCommand(_input);
+            Message = CommandManager.LastCommand?.Description;
             _input = "";
         }
 
@@ -201,7 +197,7 @@ namespace RuntimeDebugger.Console
             GUI.color = Color.black;
             GUI.skin.label.fontSize = (int)_nativeWidth / 45;
             GUI.Label(new Rect(5, _nativeHeight - _nativeHeight/10, _adjustedWidth / 4,
-            _nativeHeight / 22), Message);
+            _nativeHeight / 20), Message);
             GUI.color = Color.white;
         }
 
