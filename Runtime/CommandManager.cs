@@ -12,12 +12,6 @@ namespace RuntimeDebugger.Commands
     {
         public static Dictionary<string, IConsoleCommand> Commands = 
             new Dictionary<string, IConsoleCommand>();
-#if !UNITY_EDITOR
-        public static LogHandler CommandLog = new LogHandler
-        ("RuntimeConsoleLogs", "CommandList", ".txt", "Command Log");
-        public static LogHandler CommandErrorLog = new LogHandler
-            ("RuntimeConsoleLogs", "CommandErrors", ".txt", "Command Errors");
-#endif
         public static IConsoleCommand LastCommand { get; private set; }
 
         public static List<string> InputCommandLogs = new List<string>();
@@ -28,10 +22,6 @@ namespace RuntimeDebugger.Commands
             {
                 #if UNITY_EDITOR
                 Debug.LogWarning($"{commandTitle} is already an existing command");
-                #endif
-
-                #if !UNITY_EDITOR
-                CommandErrorLog.WriteToLog($"{commandTitle} is already an existing command");
                 #endif
                 return;
             }
@@ -46,10 +36,6 @@ namespace RuntimeDebugger.Commands
 
 #if UNITY_EDITOR
                 Debug.LogWarning($"{commandTitle} is already an existing command");
-#endif
-
-#if !UNITY_EDITOR
-                CommandErrorLog.WriteToLog($"{commandTitle} already exists as an existing command");
 #endif
                 return;
             }

@@ -16,10 +16,6 @@ namespace RuntimeDebugger.Commands
             this._commandDescription = commandDescription;
             this._command = command;
             CommandManager.Commands.Add(commandTitle, this);
-
-            #if !UNITY_EDITOR
-            CommandManager.CommandLog.WriteToLog($"Command: {commandTitle}");
-            #endif
         }
 
         public void InvokeCommand()
@@ -45,9 +41,6 @@ namespace RuntimeDebugger.Commands
             this._commandDescription = commandDescription;
             this._command = commandWithParam;
             CommandManager.Commands.Add(commandTitle, this);
-            #if !UNITY_EDITOR
-            CommandManager.CommandLog.WriteToLog($"Command: {commandTitle}");
-            #endif
             ParamType = typeof(T);
         }
 
