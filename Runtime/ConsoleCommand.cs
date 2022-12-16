@@ -80,7 +80,6 @@ namespace RuntimeDebugger.Commands
             _commandInfo = _commandThreeParams.GetMethodInfo();
             ParamTypes = _commandInfo.GetParameters();
             CommandManager.Commands.Add(commandTitle, this);
-            ParamType = typeof(T);
         }
 
         public string Description => _commandDescription;

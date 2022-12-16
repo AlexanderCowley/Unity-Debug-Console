@@ -9,8 +9,8 @@ public class CustomizeLight : MonoBehaviour
     void Awake()
     {
         _light = GetComponent<Light>();
-        CommandManager.AddCommand<bool>("toggle-light", "turns light off or on", ToggleLight);
-        CommandManager.AddCommand<float>("light-int", "Changes light intensity", ChangeIntensity);
+        CommandManager.AddCommand<bool>("toggle-light", "turns light off or on", ToggleLight, this);
+        CommandManager.AddCommand<float>("light-int", "Changes light intensity", ChangeIntensity, this);
     }
 
     void ToggleLight(bool lightValue)
