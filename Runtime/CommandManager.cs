@@ -20,9 +20,9 @@ namespace RuntimeDebugger.Commands
         {
             if (Commands.ContainsKey(commandTitle))
             {
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 Debug.LogWarning($"{commandTitle} is already an existing command");
-                #endif
+#endif
                 return;
             }
             new ConsoleCommand(commandTitle, commandDescription, command);
@@ -33,7 +33,6 @@ namespace RuntimeDebugger.Commands
         {
             if (Commands.ContainsKey(commandTitle))
             {
-
 #if UNITY_EDITOR
                 Debug.LogWarning($"{commandTitle} is already an existing command");
 #endif
@@ -48,8 +47,8 @@ namespace RuntimeDebugger.Commands
         {
             if (Commands.ContainsKey(commandTitle))
             {
-#if !UNITY_EDITOR
-                CommandErrorLog.WriteToLog($"{commandTitle} already exists as an existing command");
+#if UNITY_EDITOR
+                Debug.LogWarning($"{commandTitle} is already an existing command");
 #endif
                 return;
             }
@@ -62,8 +61,8 @@ namespace RuntimeDebugger.Commands
         {
             if (Commands.ContainsKey(commandTitle))
             {
-#if !UNITY_EDITOR
-                CommandErrorLog.WriteToLog($"{commandTitle} already exists as an existing command");
+#if UNITY_EDITOR
+                Debug.LogWarning($"{commandTitle} is already an existing command");
 #endif
                 return;
             }
@@ -74,7 +73,7 @@ namespace RuntimeDebugger.Commands
         public static void ParseCommand(string input)
         {
             //Remove space from beginning of input
-            input.TrimStart();
+            input.Trim();
             //Seperate by space
             string[] inputProperties = input.Split(' ');
             //try/catch?
