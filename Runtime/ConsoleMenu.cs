@@ -70,8 +70,7 @@ namespace RuntimeDebugger.Console
         //Initalizes default commands objects
         void OnEnable()
         {
-            UtilityCommands.AddDefaultCommands();
-
+            CommandManager.AddAllCommands();
             //Console Log Item Style Settings
             _logStyle.wordWrap = true;
             _logStyle.normal.textColor = Color.white;
