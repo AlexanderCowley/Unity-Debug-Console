@@ -1,26 +1,30 @@
 using UnityEngine;
 using RuntimeDebugger.Commands;
 
-[RequireComponent(typeof(Light))]
-public class CustomizeLight : MonoBehaviour
+namespace RuntimeDebugger.Tests
 {
-    Light _light;
-    float _defaultLightIntensity = 10;
-    void Awake()
+    [RequireComponent(typeof(Light))]
+    public class CustomizeLight : MonoBehaviour
     {
-        _light = GetComponent<Light>();
-        CommandManager.AddCommand<bool>("toggle-light", "turns light off or on", ToggleLight, this);
-        CommandManager.AddCommand<float>("light-int", "Changes light intensity", ChangeIntensity, this);
-    }
+        Light _light;
+        float _defaultLightIntensity = 10;
+        void Awake()
+        {
+            _light = GetComponent<Light>();
+            // CommandManager.AddCommand<bool>("toggle-light", "turns light off or on", ToggleLight, this);
+            // CommandManager.AddCommand<float>("light-int", "Changes light intensity", ChangeIntensity, this);
+        }
 
-    void ToggleLight(bool lightValue)
-    {
-        _light.intensity = lightValue ? _defaultLightIntensity : 0;
-    }
+        void ToggleLight(bool lightValue)
+        {
+            _light.intensity = lightValue ? _defaultLightIntensity : 0;
+        }
 
-    void ChangeIntensity(float intensityValue)
-    {
-        _light.intensity = intensityValue;
-        _defaultLightIntensity = intensityValue;
+        void ChangeIntensity(float intensityValue)
+        {
+            _light.intensity = intensityValue;
+            _defaultLightIntensity = intensityValue;
+        }
     }
 }
+

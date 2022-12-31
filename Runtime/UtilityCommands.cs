@@ -3,12 +3,8 @@ namespace RuntimeDebugger.Commands
 {
     public static class UtilityCommands
     {
-        public static void AddDefaultCommands()
-        {
-            CommandManager.AddCommand("help", "displays all commands", Help);
-            CommandManager.AddCommand("clear", "clears log history", ClearLog);
-        }
         //Lists all commands
+        [AddCommand("help")]
         static void Help()
         {
             CommandManager.InputCommandLogs.Add("Commands Available: ");
@@ -17,7 +13,7 @@ namespace RuntimeDebugger.Commands
                 CommandManager.InputCommandLogs.Add($" - {key}: " + 
                     $"{CommandManager.Commands[key].Description}");
         }
-
+        [AddCommand("clear")]
         static void ClearLog()
         {
             CommandManager.InputCommandLogs.Clear();
