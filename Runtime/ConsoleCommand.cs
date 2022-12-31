@@ -8,25 +8,68 @@ namespace RuntimeDebugger.Commands
     {
         string _commandTitle;
         string _commandDescription;
-        Action _command;
+        Delegate _command;
+        public ParameterInfo[] ParamTypes { get; private set; }
+        object _instance;
 
         public string Description => _commandDescription;
-        public ConsoleCommand(string commandTitle, string commandDescription, Action command)
+        public ConsoleCommand(string commandTitle, string commandDescription, 
+        Delegate command, object instance)
         {
             this._commandTitle = commandTitle;
             this._commandDescription = commandDescription;
             this._command = command;
+
+            //Get parameter types
+            ParamTypes = command.GetMethodInfo().GetParameters();
+            _instance = instance;
             CommandManager.Commands.Add(commandTitle, this);
         }
 
-        public void InvokeCommand()
+        public ConsoleCommand(string commandTitle, string commandDescription, 
+        Delegate command)
         {
-            _command?.Invoke();
+            this._commandTitle = commandTitle;
+            this._commandDescription = commandDescription;
+            this._command = command;
+
+            //Get parameter types
+            ParamTypes = command.GetMethodInfo().GetParameters();
+            CommandManager.Commands.Add(commandTitle, this);
         }
+
+        public void InvokeCommand(object[] args)
+        {
+            _command?.GetMethodInfo().Invoke(_instance, args);
+        }
+
+        public void InvokeCommand(){}
 
         public void ProcessArgs(string[] args)
         {
-            InvokeCommand();
+            if (args.Length - 1 != ParamTypes.Length)
+            {
+                Debug.LogWarning("Incorrect number of parameters");
+                return;
+            }
+
+            object[] parameters = new object[ParamTypes.Length];
+            //Match type conversion with ParamType Array
+            for(int i = 1; i < ParamTypes.Length; i++)
+            {
+                try
+                {
+                    parameters[i] = Convert.ChangeType(args[i], ParamTypes[i].ParameterType);
+                }
+                catch(FormatException)
+                {
+                    Debug.LogWarning("Incorrect Parameters");
+                    return;
+                }
+                
+            }
+
+            InvokeCommand(parameters);
         }
     }
 
