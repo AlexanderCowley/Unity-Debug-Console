@@ -47,7 +47,8 @@ namespace RuntimeDebugger.Commands
 
         public void ProcessArgs(string[] args)
         {
-            if (args.Length - 1 != ParamTypes.Length)
+            //
+            if (args.Length != ParamTypes.Length)
             {
                 Debug.LogWarning("Incorrect number of parameters");
                 return;
@@ -55,7 +56,7 @@ namespace RuntimeDebugger.Commands
 
             object[] parameters = new object[ParamTypes.Length];
             //Match type conversion with ParamType Array
-            for(int i = 1; i < ParamTypes.Length; i++)
+            for(int i = 0; i < ParamTypes.Length; i++)
             {
                 try
                 {
@@ -68,7 +69,7 @@ namespace RuntimeDebugger.Commands
                 }
                 
             }
-
+            //parameters
             InvokeCommand(parameters);
         }
     }

@@ -11,15 +11,13 @@ namespace RuntimeDebugger.Tests
         void Awake()
         {
             _light = GetComponent<Light>();
-            // CommandManager.AddCommand<bool>("toggle-light", "turns light off or on", ToggleLight, this);
-            // CommandManager.AddCommand<float>("light-int", "Changes light intensity", ChangeIntensity, this);
         }
-
+        [AddCommand("light")]
         void ToggleLight(bool lightValue)
         {
             _light.intensity = lightValue ? _defaultLightIntensity : 0;
         }
-
+        [AddCommand("light-int")]
         void ChangeIntensity(float intensityValue)
         {
             _light.intensity = intensityValue;

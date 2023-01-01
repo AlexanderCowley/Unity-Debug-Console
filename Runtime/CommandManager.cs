@@ -180,17 +180,20 @@ namespace RuntimeDebugger.Commands
             //Remove space from beginning of input
             input.Trim();
             //Seperate by space
-            string[] inputProperties = input.Split(' ');
+            int commandKeyIndex = input.IndexOf(' ');
+            string commandKey = input.Substring(0, commandKeyIndex);
+            string inputParameters = input.Substring(commandKeyIndex + 1);
+            string[] inputProperties = inputParameters.Split(' ');
             //try/catch?
             //Log the Error to User
-            if (!Commands.ContainsKey(inputProperties[0]))
+            if (!Commands.ContainsKey(commandKey))
             {
-                InputCommandLogs.Add($"Command: {inputProperties[0]} does not exist.");
+                InputCommandLogs.Add($"Command: {commandKey} does not exist.");
                 InputCommandLogs.Add($"Type help for a list of available commands.");
                 return;
             }
-            Commands[inputProperties[0]]?.ProcessArgs(inputProperties);
-            LastCommand = Commands[inputProperties[0]];
+            Commands[commandKey]?.ProcessArgs(inputProperties);
+            LastCommand = Commands[commandKey];
         }
     }
 }
