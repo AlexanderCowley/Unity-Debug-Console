@@ -40,7 +40,10 @@ namespace RuntimeDebugger.Commands
 
         public void InvokeCommand(object[] args)
         {
-            _command?.GetMethodInfo().Invoke(_instance, args);
+            var message = _command?.GetMethodInfo().Invoke(_instance, args);
+
+            if(!_command.GetMethodInfo().ReturnType.Equals(typeof(void)))
+                CommandManager.InputCommandLogs.Add(message.ToString());
         }
 
         public void InvokeCommand(){}
