@@ -19,13 +19,14 @@ namespace RuntimeDebugger.Commands
         public static IConsoleCommand LastCommand { get; private set; }
 
         public static List<string> InputCommandLogs = new List<string>();
+        static List<Type> RegisteredTypes = new();
         
         static AddCommandAttribute _cmdAttr;
         public static void AddAllCommands()
         {
             //Iterate through each assembly to find assemblies with the AddCommandAttribute
+            //Get Monobehaviors
             //Assembly -> Types -> Methods -> Methods with Attribute
-            //Assembly -> Types (Get Types with attribute, Get Instances), -> Methods
             //Assembly -> Types -> Types with attributes -> instances -> methods with attribute
             /*Where statements blacklist assemblies that starts with the name
             Unity, Microsoft and System, reduces the assembly to loop from 157 to 15
@@ -78,10 +79,10 @@ namespace RuntimeDebugger.Commands
 
             static void GetUtilityCommands()
             {
-            //Get utility commands
-            var UtilityCommands = Assembly.
-                GetExecutingAssembly().GetType("RuntimeDebugger.Commands.UtilityCommands").
-                GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                //Get utility commands
+                var UtilityCommands = Assembly.
+                    GetExecutingAssembly().GetType("RuntimeDebugger.Commands.UtilityCommands").
+                    GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
                 for(int i = 0; i < UtilityCommands.Count(); i++)
                 {
@@ -95,6 +96,39 @@ namespace RuntimeDebugger.Commands
                     new ConsoleCommand(_cmdAttr.CmdName, _cmdAttr.CmdDesc, cmd);
                 }
             }
+        }
+        
+        //Call in constructor
+        public static void RegisterType(object instance, Type type)
+        {
+            //Get Methods
+            MethodInfo[] methods = type.GetMethods(
+                BindingFlags.Public | 
+                BindingFlags.NonPublic | 
+                BindingFlags.Static |
+                BindingFlags.Instance);
+
+            //Get Method Attributes with AddCommand
+            for(int i = 0; i < methods.Count(); i++)
+            {
+                _cmdAttr = methods.ElementAt(i).
+                    GetCustomAttribute<AddCommandAttribute>();
+
+                if(_cmdAttr == null)
+                    continue;
+
+                Delegate cmd = CreateDelegate(methods.ElementAt(i), instance);
+                //Add command to instance
+                new ConsoleCommand(_cmdAttr.CmdName, 
+                    _cmdAttr.CmdDesc, cmd, instance);
+            }
+            RegisteredTypes.Add(type);
+        }
+
+        public static void UnregisterType(Type type)
+        {
+            RegisteredTypes.Remove(type);
+            //Remove Command
         }
 
         static Delegate CreateDelegate(MethodInfo methodInfo, object target)
@@ -122,66 +156,32 @@ namespace RuntimeDebugger.Commands
             return monoBehaviours;
         }
 
-        public static void AddCommand(string commandTitle, string commandDescription, Action command)
-        {
-            if (Commands.ContainsKey(commandTitle))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning($"{commandTitle} is already an existing command");
-#endif
-                return;
-            }
-        }
-
-        public static void AddCommand<T>(string commandTitle, string commandDescription,
-            Action<T> command, object sender) where T : IConvertible
-        {
-            if (Commands.ContainsKey(commandTitle))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning($"{commandTitle} is already an existing command");
-#endif
-                return;
-            }
-
-            new ConsoleCommand<T>(commandTitle, commandDescription, command, sender);
-        }
-
-        public static void AddCommand<T>(string commandTitle, string commandDescription,
-            Action<T,T> command, object sender) where T : IConvertible
-        {
-            if (Commands.ContainsKey(commandTitle))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning($"{commandTitle} is already an existing command");
-#endif
-                return;
-            }
-
-            new ConsoleCommand<T>(commandTitle, commandDescription, command, sender);
-        }
-
-        public static void AddCommand<T>(string commandTitle, string commandDescription,
-            Action<T,T,T> command, object sender) where T : IConvertible
-        {
-            if (Commands.ContainsKey(commandTitle))
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning($"{commandTitle} is already an existing command");
-#endif
-                return;
-            }
-
-            new ConsoleCommand<T>(commandTitle, commandDescription, command, sender);
-        }
-
         public static void ParseCommand(string input)
         {
-            //Remove space from beginning of input
+            int commandKeyIndex = 0;
+            string commandKey;
+            //Remove space from beginning and end of input
             input.Trim();
-            //Seperate by space
-            int commandKeyIndex = input.IndexOf(' ');
-            string commandKey = input.Substring(0, commandKeyIndex);
+            //Seperate key by space
+            //if the input has no args
+            if(!input.Contains(' '))
+            {
+                commandKey = input;
+
+                if (!Commands.ContainsKey(commandKey))
+                {
+                    InputCommandLogs.Add($"Command: {commandKey} does not exist.");
+                    InputCommandLogs.Add($"Type help for a list of available commands.");
+                    return;
+                }
+
+                Commands[commandKey]?.InvokeCommand();
+                LastCommand = Commands[commandKey];
+                return;
+            }
+            //Get Key
+            commandKeyIndex = input.IndexOf(' ');
+            commandKey = input.Substring(0, commandKeyIndex);
             string inputParameters = input.Substring(commandKeyIndex + 1);
             string[] inputProperties = inputParameters.Split(' ');
             //try/catch?
