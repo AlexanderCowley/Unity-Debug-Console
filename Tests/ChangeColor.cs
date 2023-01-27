@@ -22,9 +22,8 @@ namespace RuntimeDebugger.Demo
         void Awake()
         {
             meshRenderer = GetComponent<MeshRenderer>();
-            CommandManager.AddCommand("changecolor", "changes cube color", ChangeMeshColor);
         }
-
+        [AddCommand("changecolor", "changes to random color")]
         void ChangeMeshColor()
         {
             _randomColor = new Color(Random.Range(0, 1f), Random.Range(0, 1f), Random.Range(0, 1f));
