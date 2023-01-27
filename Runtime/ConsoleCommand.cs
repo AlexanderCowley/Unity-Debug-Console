@@ -46,7 +46,13 @@ namespace RuntimeDebugger.Commands
                 CommandManager.InputCommandLogs.Add(message.ToString());
         }
 
-        public void InvokeCommand(){}
+        public void InvokeCommand()
+        {
+            var message = _command?.GetMethodInfo().Invoke(_instance, null);
+
+            if(!_command.GetMethodInfo().ReturnType.Equals(typeof(void)))
+                CommandManager.InputCommandLogs.Add(message.ToString());
+        }
 
         public void ProcessArgs(string[] args)
         {
