@@ -163,7 +163,7 @@ namespace RuntimeDebugger.Commands
             //Remove space from beginning and end of input
             input.Trim();
             //Seperate key by space
-            //if the input has no args
+            //if the input has no white space then, there are no args
             if(!input.Contains(' '))
             {
                 commandKey = input;
