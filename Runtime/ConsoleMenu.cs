@@ -152,9 +152,6 @@ namespace RuntimeDebugger.Console
             Rect consoleLogRect = new Rect(0, 0, _adjustedWidth / 3, _nativeHeight / 4);
             GUI.Box(consoleLogRect, "");
             
-            Rect scrollViewRect = new Rect(3, 6,
-            _adjustedWidth / 3, _nativeHeight / 4.2f);
-            
             Rect viewRect = new Rect(4, 4, _adjustedWidth / 26, 
             (_nativeHeight / 10) * logCount);
             
@@ -164,15 +161,19 @@ namespace RuntimeDebugger.Console
             //calculates scroll position by dividing the scroll position by the font size
             int firstIndex = (int)ScrollPos.y / _logStyle.fontSize;
             Rect labelRect = new Rect(24, (firstIndex * 18f) + (viewRect.y + _labelHeaderOffset), 
-            _adjustedWidth / 3, _nativeHeight / 22);
+            _adjustedWidth / 4, _nativeHeight / 22);
+            GUI.skin.label.clipping = TextClipping.Overflow;
+            //Recalc the size of the label rect
+            //Reset calc?
             GUI.skin.label.wordWrap = true;
             GUI.skin.label.fontSize = (int)_nativeWidth / 62;
             //Draw each input element
             for(int i = firstIndex; i < Mathf.Min
             (logCount, firstIndex + _viewCount); i++)
             {
-                GUI.Label(labelRect, CommandManager.InputCommandLogs[i]);
-                labelRect.y += labelRect.height + 6;
+                _logContent.text = CommandManager.InputCommandLogs[i];
+                GUI.Label(labelRect, _logContent);
+                labelRect.y += GUI.skin.label.CalcHeight(_logContent, labelRect.width) + 6;
             }
             GUI.EndScrollView();
         }
