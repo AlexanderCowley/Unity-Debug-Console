@@ -171,6 +171,7 @@ namespace RuntimeDebugger.Console
             for(int i = firstIndex; i < Mathf.Min
             (logCount, firstIndex + _viewCount); i++)
             {
+                //Assigning new strings causes frequent memory allocation?
                 _logContent.text = CommandManager.InputCommandLogs[i];
                 GUI.Label(labelRect, _logContent);
                 labelRect.y += GUI.skin.label.CalcHeight(_logContent, labelRect.width) + 6;
