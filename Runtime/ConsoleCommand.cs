@@ -52,12 +52,14 @@ namespace RuntimeDebugger.Commands
             {
                 CommandManager.InputCommandLogs.Add("Incorrect parameters");
                 //Alt: Use a for loop for each type with Type.Name field
-                //Might not be efficent but, 
-                //it will avoid hitting the end of the label rect
-                CommandManager.InputCommandLogs.Add($"{_commandTitle} takes in => " + 
-                    $"{string.Join(',', (object[])ParamTypes)} Parameter(s)");
+                //Might not be efficent but, it will be clear
+                //Memory Issue?
+                CommandManager.InputCommandLogs.Add($"{_commandTitle}" + 
+                    "takes in these parameter(s) => \n\t" + 
+                    $"{string.Join("\n\t", (object[])ParamTypes)}");
                 return;
             }
+
             var message = _command?.GetMethodInfo().Invoke(_instance, null);
 
             if(!_command.GetMethodInfo().ReturnType.Equals(typeof(void)))
