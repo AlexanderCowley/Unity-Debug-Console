@@ -8,10 +8,10 @@ namespace RuntimeDebugger.Commands
         static void Help()
         {
             CommandManager.InputCommandLogs.Add("Commands Available: ");
-            Dictionary<string, IConsoleCommand>.KeyCollection keys = CommandManager.Commands.Keys;
+            Dictionary<string, CommandObject>.KeyCollection keys = CommandManager.Commands.Keys;
             foreach(string key in keys)
                 CommandManager.InputCommandLogs.Add($" - {key}: " + 
-                    $"{CommandManager.Commands[key].Description}");
+                    $"{CommandManager.Commands[key].LastCommand.Description}");
         }
         [AddCommand("clear")]
         static void ClearLog()
