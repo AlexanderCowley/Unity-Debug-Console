@@ -119,7 +119,7 @@ namespace RuntimeDebugger.Console
             CommandManager.InputCommandLogs.Add(_input);
             //parses input for command manager to handle
             CommandManager.ParseCommand(_input);
-            Message = CommandManager.LastCommand?.Description;
+            Message = CommandManager.LastCMDInstance?.LastCommand?.Description;
             _input = "";
         }
 
