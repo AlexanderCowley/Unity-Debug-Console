@@ -12,9 +12,10 @@ namespace RuntimeDebugger.Commands
         public ParameterInfo[] ParamTypes { get; private set; }
         object _instance;
 
+        public string CommandKey => _commandTitle;
         public string Description => _commandDescription;
-        public ConsoleCommand(string commandTitle, string commandDescription, 
-        Delegate command, object instance)
+        public ConsoleCommand(string commandTitle, 
+            string commandDescription, Delegate command)
         {
             this._commandTitle = commandTitle;
             this._commandDescription = commandDescription;
@@ -22,20 +23,6 @@ namespace RuntimeDebugger.Commands
 
             //Get parameter types
             ParamTypes = command.GetMethodInfo().GetParameters();
-            _instance = instance;
-            CommandManager.Commands.Add(commandTitle, this);
-        }
-
-        public ConsoleCommand(string commandTitle, string commandDescription, 
-        Delegate command)
-        {
-            this._commandTitle = commandTitle;
-            this._commandDescription = commandDescription;
-            this._command = command;
-
-            //Get parameter types
-            ParamTypes = command.GetMethodInfo().GetParameters();
-            CommandManager.Commands.Add(commandTitle, this);
         }
 
         public void InvokeCommand(object[] args)
@@ -66,9 +53,13 @@ namespace RuntimeDebugger.Commands
                 CommandManager.InputCommandLogs.Add(message.ToString());
         }
 
-        public void ProcessArgs(string[] args)
+        public void ProcessArgs(string[] args = null)
         {
-            //
+            //Checks if there are parameters to convert
+            if(args == null)
+                InvokeCommand();
+
+            //If the amount of parameters is not equal to the argument length
             if (args.Length != ParamTypes.Length)
             {
                 Debug.LogWarning("Incorrect number of parameters");
@@ -90,7 +81,7 @@ namespace RuntimeDebugger.Commands
                 }
                 
             }
-            //parameters
+            //input parameters to invoke command
             InvokeCommand(parameters);
         }
     }
@@ -116,7 +107,6 @@ namespace RuntimeDebugger.Commands
             //Get parameter array for matching types
             _commandInfo = _command.GetMethodInfo();
             ParamTypes = _commandInfo.GetParameters();
-            CommandManager.Commands.Add(commandTitle, this);
         }
 
         public ConsoleCommand(string commandTitle, string commandDescription, 
@@ -130,7 +120,6 @@ namespace RuntimeDebugger.Commands
             //Get parameter array for matching types
             _commandInfo = _commandTwoParams.GetMethodInfo();
             ParamTypes = _commandInfo.GetParameters();
-            CommandManager.Commands.Add(commandTitle, this);
         }
 
             public ConsoleCommand(string commandTitle, string commandDescription, 
@@ -144,9 +133,9 @@ namespace RuntimeDebugger.Commands
             //Get parameter array for matching types
             _commandInfo = _commandThreeParams.GetMethodInfo();
             ParamTypes = _commandInfo.GetParameters();
-            CommandManager.Commands.Add(commandTitle, this);
         }
 
+        public string CommandKey => _commandTitle;
         public string Description => _commandDescription;
 
         public void InvokeCommand(object[] Values)
