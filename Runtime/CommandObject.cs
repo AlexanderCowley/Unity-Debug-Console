@@ -1,26 +1,43 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuntimeDebugger.Commands
 {
     public class CommandObject
     {
+        //Should refer to gameobject if the script is a monobehaviour
         public readonly object Instance;
         public readonly string InstanceKey;
-        public readonly ConsoleCommand[] Commands;
+        public List<ConsoleCommand> Commands { get; private set; } = new();
         public ConsoleCommand LastCommand {get; private set;}
-        public CommandObject(ConsoleCommand[] commands, string instanceKey, 
+        public CommandObject(ConsoleCommand command, string instanceKey, 
             object instance = null)
         {
             Instance = instance;
             InstanceKey = instanceKey;
-            Commands = commands;
+            AddCommand(command, instance);
             CommandManager.Commands.Add(InstanceKey, this);
-            Debug.Log($"Added Object: {InstanceKey}");
+        }
+
+        public CommandObject(ConsoleCommand command, string instanceKey, 
+            MonoBehaviour instance)
+        {
+            Instance = instance.gameObject;
+            InstanceKey = instanceKey;
+            AddCommand(command, instance);
+            CommandManager.Commands.Add(InstanceKey, this);
+        }
+
+        public CommandObject(string instanceKey, object instance = null)
+        {
+            InstanceKey = instanceKey;
+            Instance = instance;
+            CommandManager.Commands.Add(InstanceKey, this);
         }
         
         //Invoke command
-        public void ProcessCommand(string commandKey = null, string[] args = null)
+        public void ProcessCommand(string commandKey, string[] args = null)
         {
             ConsoleCommand command = GetCommand(commandKey);
             command?.ProcessArgs(args);
@@ -29,24 +46,21 @@ namespace RuntimeDebugger.Commands
 
         ConsoleCommand GetCommand(string inputCommand)
         {
-            int index = Array.IndexOf(Commands, inputCommand);
+            ConsoleCommand command = Commands.Find(
+                command => command.CommandKey == inputCommand);
 
-            if(index == -1)
+            if(command == null)
             {
-                Debug.LogWarning("Incorrect Command Entered");
+                Debug.LogWarning("Command Not Found");
                 return null;
             }
-            return Commands[index];
+            return command;
         }
 
-        public void AddCommand(ConsoleCommand command)
+        public void AddCommand(ConsoleCommand commandToAdd, object cmdInstance)
         {
-            //Add Command to instance
-        }
-
-        public void AddCommands(ConsoleCommand[] commands)
-        {
-            Debug.Log($"Commands added to {InstanceKey}");
+            commandToAdd.SetInstance(cmdInstance);
+            Commands.Add(commandToAdd);
         }
     }
 }

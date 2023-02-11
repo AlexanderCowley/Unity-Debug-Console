@@ -18,7 +18,7 @@ namespace RuntimeDebugger.Commands
             new Dictionary<string, CommandObject>();
         public static CommandObject LastCMDInstance { get; private set; }
 
-        public static List<string> InputCommandLogs = new List<string>();
+        public static List<string> InputCommandLogs = new();
         static List<Type> RegisteredTypes = new();
         
         static AddCommandAttribute _cmdAttr;
@@ -26,7 +26,6 @@ namespace RuntimeDebugger.Commands
         public static void AddAllCommands()
         {
             //Iterate through each assembly to find assemblies with the AddCommandAttribute
-            //Get GameObjects
             //Get Monobehaviors
             //Assembly -> Types -> Methods -> Methods with Attribute
             //Assembly -> Types -> instances -> methods with attribute
@@ -38,7 +37,7 @@ namespace RuntimeDebugger.Commands
             GetUtilityCommands();
             //Get Monobehavior Instance
             MonoBehaviour[] monoBehaviours = GetMonoBehaviours(true);
-            //Create CommandObjects
+
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().
             Where(x => !x.FullName.StartsWith("Unity") && 
             !x.FullName.StartsWith("Microsoft") &&
@@ -60,32 +59,28 @@ namespace RuntimeDebugger.Commands
                     var monoFiltered = monoBehaviours.Where(x => 
                         _currentAssembly.GetType(
                         x.GetType().FullName) == types[j]);
+                    
+                    if(!monoFiltered.Any())
+                        continue;
 
                     //Matches multiple objects with the same component
                     for (int m = 0; m < monoFiltered.Count(); m++)
                     {
                         //Adding commands for one type
-                        ConsoleCommand[] commands = new ConsoleCommand[methods.Length];
-                        //Get Delegate type
                         for(int k = 0; k < methods.Length; k++)
                         {
                             //Check types for attribute
                             _cmdAttr = methods[k].GetCustomAttribute<AddCommandAttribute>();
                             if(_cmdAttr == null)
                                 continue;
+                            
+                            //Get Delegate type
                             Delegate cmd = CreateDelegate(methods[k], monoFiltered.ElementAt(m));
-                            commands[k] = new ConsoleCommand(_cmdAttr.CmdName, 
-                                _cmdAttr.CmdDesc, cmd);
+                            AddCommand(new ConsoleCommand(_cmdAttr.CmdName, 
+                                _cmdAttr.CmdDesc, cmd), monoFiltered.ElementAt(m));
                         }
-                        //Checks if all array elements are null
-                        //Continues loop if so
-                        if(commands.All(x => x == null))
-                            continue;
-                        
-                        AddCommands(commands, monoFiltered.ElementAt(m).gameObject);
                     }
                 }
-                  
             }
         }
             //Retrieve attribute for attribute data from parameters
@@ -101,7 +96,7 @@ namespace RuntimeDebugger.Commands
                     GetExecutingAssembly().GetType("RuntimeDebugger.Commands.UtilityCommands").
                     GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
-                ConsoleCommand[] commands = new ConsoleCommand[UtilityCommands.Length];
+                CommandObject staticCommands = new CommandObject(string.Empty);
 
                 for(int i = 0; i < UtilityCommands.Count(); i++)
                 {
@@ -112,50 +107,51 @@ namespace RuntimeDebugger.Commands
                         continue;
                     
                     Delegate cmd = CreateDelegate(UtilityCommands.ElementAt(i), null);
-                    commands[i] = new ConsoleCommand(_cmdAttr.CmdName, _cmdAttr.CmdDesc, cmd);
+                    staticCommands.AddCommand(new ConsoleCommand(_cmdAttr.CmdName, 
+                        _cmdAttr.CmdDesc, cmd), null);
                 }
-
-                new CommandObject(commands, string.Empty);
             }
 
-            static void AddCommands(ConsoleCommand[] commands, GameObject gameObject)
+        static void AddCommand(ConsoleCommand command, MonoBehaviour monoScript)
+        {
+            //Cache key
+            string key = string.Empty;
+            Dictionary<string, CommandObject>.ValueCollection commandObjects = Commands.Values;
+            for(int i = 0; i < commandObjects.Count(); i++)
             {
-                //Cache key
-                //Collection of CommandObjects
-                string key = string.Empty;
-                Dictionary<string, CommandObject>.ValueCollection commandObjects = Commands.Values;
-                for(int i = 0; i < commandObjects.Count(); i++)
+                object instance = commandObjects.ElementAt(i).Instance;
+                //First CommandObject has no instance
+                //If instance does not exist add commands to static commandObject
+                if(monoScript == null)
                 {
-                    object instance = commandObjects.ElementAt(i).Instance;
-                    //First CommandObject has no instance
-                    //If instance does not exist add commands to static commandObject
-                    if(gameObject == null)
-                    {
-                        Commands[string.Empty].AddCommands(commands);
-                        continue;
-                    }
-
-                    //If the instance is null continue the loop
-                    if(instance == null)
-                    {
-                        continue;
-                    }
-
-                    //If the instance and gameObject pointer are the same
-                    //then add the commands to the CommandObject
-                    if(instance.Equals(gameObject))
-                    {
-                        Debug.Log(gameObject.name);
-                        //Get Instance key
-                        key = commandObjects.ElementAt(i).InstanceKey;
-                        //Add Commands to object
-                        Commands[key].AddCommands(commands);
-                        return;
-                    }
+                    Commands[string.Empty].AddCommand(command, null);
+                    continue;
                 }
-                    //If the key is not found add a new command object
-                    new CommandObject(commands, GenerateInstanceKey(gameObject), gameObject);
+                //If the instance is null continue the loop
+                if(instance == null)
+                {
+                    continue;
+                }
+                //If the instance and monobehaviour pointer are the same
+                //then add the commands to the CommandObject
+                if(Object.ReferenceEquals(instance, monoScript.gameObject))
+                {
+                    //Get Instance key
+                    key = commandObjects.ElementAt(i).InstanceKey;
+                    //Add Commands to object
+                    Commands[key].AddCommand(command, monoScript);
+                    return;
+                }
             }
+            //If the key is not found add a new command object
+            string generatedKey = GenerateInstanceKey(monoScript);
+            if(generatedKey == null)
+            {
+                Debug.LogWarning("Duplicate Command Entered");
+                return;
+            }
+            new CommandObject(command, generatedKey, monoScript.gameObject);
+        }
         
         //Call in constructor
         //Switch parameters to make instance optional for static methods
@@ -168,7 +164,6 @@ namespace RuntimeDebugger.Commands
                 BindingFlags.Static |
                 BindingFlags.Instance);
 
-            ConsoleCommand[] commands = new ConsoleCommand[methods.Length];
             //Get Method Attributes with AddCommand
             for(int i = 0; i < methods.Count(); i++)
             {
@@ -180,11 +175,11 @@ namespace RuntimeDebugger.Commands
 
                 Delegate cmd = CreateDelegate(methods.ElementAt(i), instance);
                 //Add command to instance
-                commands[i] = new ConsoleCommand(_cmdAttr.CmdName, 
-                    _cmdAttr.CmdDesc, cmd);
+                new CommandObject(new ConsoleCommand(_cmdAttr.CmdName, 
+                    _cmdAttr.CmdDesc, cmd), GenerateInstanceKey(instance), instance);
             }
 
-            new CommandObject(commands, instanceKey, instance);
+            
             RegisteredTypes.Add(type);
         }
 
@@ -219,22 +214,41 @@ namespace RuntimeDebugger.Commands
             return monoBehaviours;
         }
 
-        static string GenerateInstanceKey(GameObject gameObject)
+        static string GenerateInstanceKey(MonoBehaviour monoScript)
         {
-            string key = gameObject.name;
-            int keyIndex = key.IndexOf(' ');
-            int increment = 1;
-            if(!Commands.ContainsKey(key) && keyIndex == -1)
+            if(monoScript == null)
+                return string.Empty;
+
+            string key = monoScript.gameObject.name;
+            if(Commands.ContainsKey(key))
             {
-                return key;
+                Debug.LogWarning("Key already exists");
+                return null;
             }
 
+            int keyIndex = key.IndexOf(" (");
+            int increment = 1;
+
+            //A key exists within the dictionary that has no spaces
+            //If there is no space
+            if(keyIndex == -1)
+            {
+                if(!Commands.ContainsKey(key))
+                {
+                    //A key with no spaces and is not in the dictionary
+                    return key;
+                }
+
+                //A key with no spaces and is in the dictionary
+                return null;
+            }
+
+            //There is a <space(>
             key = key.Substring(0, keyIndex);
             while(Commands.ContainsKey($"{key}-{increment}"))
             {
                 increment++;
             }
-            Debug.Log($"Generate Key Name {key}");
             return $"{key}-{increment}";
         }
 
@@ -259,7 +273,6 @@ namespace RuntimeDebugger.Commands
             {
                 instanceKey = input.Substring(0, instanceKeyIndex);
             }
-
             //Seperate key by space
             //if the input has no white space then, there are no args
             //Add support for optional parameters??
@@ -267,15 +280,15 @@ namespace RuntimeDebugger.Commands
             {
                 commandKey = input;
 
-                if (!Commands.ContainsKey(commandKey))
+                if (!Commands.ContainsKey(instanceKey))
                 {
-                    InputCommandLogs.Add($"Command: {commandKey} does not exist.");
+                    InputCommandLogs.Add($"Command: {instanceKey} does not exist.");
                     InputCommandLogs.Add($"Type help for a list of available commands.");
                     return;
                 }
 
-                Commands[commandKey]?.ProcessCommand();
-                LastCMDInstance = Commands[commandKey];
+                Commands[instanceKey]?.ProcessCommand(commandKey);
+                LastCMDInstance = Commands[instanceKey];
                 return;
             }
             //Get Key
@@ -285,15 +298,15 @@ namespace RuntimeDebugger.Commands
             string[] inputProperties = inputParameters.Split(' ');
             //try/catch?
             //Log the Error to User
-            if (!Commands.ContainsKey(commandKey))
+            if (!Commands.ContainsKey(instanceKey))
             {
-                InputCommandLogs.Add($"Command: {commandKey} does not exist.");
+                InputCommandLogs.Add($"Command: {instanceKey} does not exist.");
                 InputCommandLogs.Add($"Type help for a list of available commands.");
                 return;
             }
 
             Commands[instanceKey]?.ProcessCommand(commandKey, inputProperties);
-            LastCMDInstance = Commands[commandKey];
+            LastCMDInstance = Commands[instanceKey];
         }
     }
 }
