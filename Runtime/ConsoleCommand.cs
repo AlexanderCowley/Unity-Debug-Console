@@ -24,7 +24,12 @@ namespace RuntimeDebugger.Commands
             //Get parameter types
             ParamTypes = command.GetMethodInfo().GetParameters();
         }
-
+        //Set instance for Commands
+        public void SetInstance(object instance)
+        {
+            _instance = instance;
+        }
+        
         public void InvokeCommand(object[] args)
         {
             var message = _command?.GetMethodInfo().Invoke(_instance, args);
@@ -57,7 +62,10 @@ namespace RuntimeDebugger.Commands
         {
             //Checks if there are parameters to convert
             if(args == null)
+            {
                 InvokeCommand();
+                return;
+            }
 
             //If the amount of parameters is not equal to the argument length
             if (args.Length != ParamTypes.Length)
