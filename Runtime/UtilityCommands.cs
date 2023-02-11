@@ -11,7 +11,7 @@ namespace RuntimeDebugger.Commands
             Dictionary<string, CommandObject>.KeyCollection keys = CommandManager.Commands.Keys;
             foreach(string key in keys)
                 CommandManager.InputCommandLogs.Add($" - {key}: " + 
-                    $"{CommandManager.Commands[key].LastCommand.Description}");
+                    $"{CommandManager.Commands[key]?.LastCommand?.Description}");
         }
         [AddCommand("clear")]
         static void ClearLog()
