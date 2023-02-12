@@ -152,6 +152,47 @@ namespace RuntimeDebugger.Commands
             }
             new CommandObject(command, generatedKey, monoScript.gameObject);
         }
+
+        static void AddCommand(ConsoleCommand command, object instance)
+        {
+            //Cache key
+            string key = string.Empty;
+            Dictionary<string, CommandObject>.ValueCollection commandObjects = Commands.Values;
+            for(int i = 0; i < commandObjects.Count(); i++)
+            {
+                object currrentInstance = commandObjects.ElementAt(i).Instance;
+                //First CommandObject has no instance
+                //If instance does not exist add commands to static commandObject
+                if(instance == null)
+                {
+                    Commands[string.Empty].AddCommand(command, null);
+                    continue;
+                }
+                //If the instance is null continue the loop
+                if(currrentInstance == null)
+                {
+                    continue;
+                }
+                //If the instance and monobehaviour pointer are the same
+                //then add the commands to the CommandObject
+                if(Object.ReferenceEquals(currrentInstance, instance))
+                {
+                    //Get Instance key
+                    key = commandObjects.ElementAt(i).InstanceKey;
+                    //Add Commands to object
+                    Commands[key].AddCommand(command, instance);
+                    return;
+                }
+            }
+            //If the key is not found add a new command object
+            string generatedKey = GenerateInstanceKey(instance);
+            if(generatedKey == null)
+            {
+                Debug.LogWarning("Duplicate Command Entered");
+                return;
+            }
+            new CommandObject(command, generatedKey, instance);
+        }
         
         //Call in constructor
         //Switch parameters to make instance optional for static methods
@@ -174,12 +215,10 @@ namespace RuntimeDebugger.Commands
                     continue;
 
                 Delegate cmd = CreateDelegate(methods.ElementAt(i), instance);
-                //Add command to instance
-                new CommandObject(new ConsoleCommand(_cmdAttr.CmdName, 
-                    _cmdAttr.CmdDesc, cmd), GenerateInstanceKey(instance), instance);
+                //Add command
+                AddCommand(new ConsoleCommand(_cmdAttr.CmdName, 
+                    _cmdAttr.CmdDesc, cmd), instance);
             }
-
-            
             RegisteredTypes.Add(type);
         }
 
@@ -217,7 +256,7 @@ namespace RuntimeDebugger.Commands
         static string GenerateInstanceKey(MonoBehaviour monoScript)
         {
             if(monoScript == null)
-                return string.Empty;
+                return null;
 
             string key = monoScript.gameObject.name;
             if(Commands.ContainsKey(key))
@@ -254,7 +293,18 @@ namespace RuntimeDebugger.Commands
 
         static string GenerateInstanceKey(object instance)
         {
-            return instance.GetType().Name;
+            if(instance == null)
+                return null;
+
+            string key = instance.GetType().Name;
+            int increment = 1;
+            //GetType.Name does not have duplicate iterator so
+            //just increment as the subject is by itself
+            while(Commands.ContainsKey($"{key}-{increment}"))
+            {
+                increment++;
+            }
+            return $"{key}-{increment}";
         }
 
         public static void ParseCommand(string input)
@@ -272,6 +322,7 @@ namespace RuntimeDebugger.Commands
             if(instanceKeyIndex != -1)
             {
                 instanceKey = input.Substring(0, instanceKeyIndex);
+                input = input.Substring(instanceKeyIndex + 1);
             }
             //Seperate key by space
             //if the input has no white space then, there are no args
@@ -293,7 +344,7 @@ namespace RuntimeDebugger.Commands
             }
             //Get Key
             commandKeyIndex = input.IndexOf(' ');
-            commandKey = input.Substring(instanceKeyIndex + 1, commandKeyIndex - (instanceKeyIndex + 1));
+            commandKey = input.Substring(0, commandKeyIndex);
             string inputParameters = input.Substring(commandKeyIndex + 1);
             string[] inputProperties = inputParameters.Split(' ');
             //try/catch?
