@@ -150,7 +150,7 @@ namespace RuntimeDebugger.Commands
                 Debug.LogWarning("Duplicate Command Entered");
                 return;
             }
-            new CommandObject(command, generatedKey, monoScript.gameObject);
+            new CommandObject(command, generatedKey, monoScript);
         }
 
         static void AddCommand(ConsoleCommand command, object instance)
