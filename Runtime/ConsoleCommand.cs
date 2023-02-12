@@ -46,7 +46,7 @@ namespace RuntimeDebugger.Commands
                 //Alt: Use a for loop for each type with Type.Name field
                 //Might not be efficent but, it will be clear
                 //Memory Issue?
-                CommandManager.InputCommandLogs.Add($"{_commandTitle}" + 
+                CommandManager.InputCommandLogs.Add($"{_commandTitle} " + 
                     "takes in these parameter(s) => \n\t" + 
                     $"{string.Join("\n\t", (object[])ParamTypes)}");
                 return;
