@@ -10,7 +10,6 @@ namespace RuntimeDebugger.Tests
         void Awake()
         {
             _objTransform = transform;
-            //CommandManager.AddCommand<bool>("rotate", "rotates a gameobject", ToggleRotation, this);
         }
         void Rotate() => _objTransform.Rotate(Vector3.up * 50 * Time.deltaTime, Space.Self);
         void Update()
@@ -21,7 +20,7 @@ namespace RuntimeDebugger.Tests
         [AddCommand("rotate-object")]
         void ToggleRotation(bool rotate)
         {
-            _isRotating = !_isRotating;
+            _isRotating = rotate;
         }
     }
 }
