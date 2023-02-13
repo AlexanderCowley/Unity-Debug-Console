@@ -258,7 +258,7 @@ namespace RuntimeDebugger.Commands
             if(monoScript == null)
                 return null;
 
-            string key = monoScript.gameObject.name;
+            string key = monoScript.gameObject.name.ToLower();
             if(Commands.ContainsKey(key))
             {
                 Debug.LogWarning("Key already exists");
@@ -296,7 +296,7 @@ namespace RuntimeDebugger.Commands
             if(instance == null)
                 return null;
 
-            string key = instance.GetType().Name;
+            string key = instance.GetType().Name.ToLower();
             int increment = 1;
             //GetType.Name does not have duplicate iterator so
             //just increment as the subject is by itself
