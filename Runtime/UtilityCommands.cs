@@ -10,8 +10,13 @@ namespace RuntimeDebugger.Commands
             CommandManager.InputCommandLogs.Add("Commands Available: ");
             Dictionary<string, CommandObject>.KeyCollection keys = CommandManager.Commands.Keys;
             foreach(string key in keys)
+            {
+                if(key == string.Empty)
+                    continue;
                 CommandManager.InputCommandLogs.Add($" - {key}: " + 
                     $"{CommandManager.Commands[key]?.LastCommand?.Description}");
+            }
+                
         }
         [AddCommand("clear")]
         static void ClearLog()
