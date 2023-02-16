@@ -8,8 +8,8 @@ namespace RuntimeDebugger.Commands
     {
         //Should refer to gameobject if the script is a monobehaviour
         public readonly object Instance;
-        public readonly string InstanceKey;
-        public List<ConsoleCommand> Commands { get; private set; } = new();
+        public string InstanceKey {get; private set;}
+        public List<ConsoleCommand> Commands {get; private set;} = new();
         public ConsoleCommand LastCommand {get; private set;}
         public CommandObject(ConsoleCommand command, string instanceKey, 
             object instance = null)
@@ -61,6 +61,11 @@ namespace RuntimeDebugger.Commands
         {
             commandToAdd.SetInstance(cmdInstance);
             Commands.Add(commandToAdd);
+        }
+
+        public void SetInstanceKey(string newKey)
+        {
+            InstanceKey = newKey;
         }
     }
 }

@@ -298,6 +298,8 @@ namespace RuntimeDebugger.Commands
 
             string key = instance.GetType().Name.ToLower();
             int increment = 1;
+            if(!Commands.ContainsKey(key))
+                return key;
             //GetType.Name does not have duplicate iterator so
             //just increment as the subject is by itself
             while(Commands.ContainsKey($"{key}-{increment}"))
@@ -305,6 +307,35 @@ namespace RuntimeDebugger.Commands
                 increment++;
             }
             return $"{key}-{increment}";
+        }
+
+        //Allows users to rename instance-keys to their convienence
+        public static void RenameInstanceKey(string oldKey, string newKey)
+        {
+            int increment = 1;
+            //Check if the oldKey exists
+            if(!Commands.ContainsKey(oldKey))
+            {
+                Debug.LogWarning("Key not found");
+                return;
+            }
+            //Get value from dictionary from oldKey
+            CommandObject oldObject = Commands[oldKey];
+            //Remove from Dictionary
+            Commands.Remove(oldKey);
+            //Check if Key exists
+            if(!Commands.ContainsKey(newKey))
+            {
+                Commands.Add(newKey, oldObject);
+                oldObject.SetInstanceKey(newKey);
+                return;
+            }
+            //Iterate name
+            while(Commands.ContainsKey(newKey+ $"-{increment}"))
+                increment++;
+            //Re-add command with new key
+            Commands.Add(newKey + $"-{increment}", oldObject);
+            oldObject.SetInstanceKey(newKey);
         }
 
         public static void ParseCommand(string input)
