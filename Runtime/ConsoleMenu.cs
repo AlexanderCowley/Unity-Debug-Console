@@ -68,13 +68,14 @@ namespace RuntimeDebugger.Console
         }
         
         //Initalizes default commands objects
-        void OnEnable()
+        void Start()
         {
             CommandManager.AddAllCommands();
+            SceneTracker.GetCurrentScene();
             //Console Log Item Style Settings
             _logStyle.wordWrap = true;
             _logStyle.normal.textColor = Color.white;
-        } 
+        }
 
         void OnGUI()
         {
@@ -207,6 +208,9 @@ namespace RuntimeDebugger.Console
             //Handles updating input outside of GUI
             if (Input.GetKeyDown(KeyCode.BackQuote))
                 _consoleToggle = !_consoleToggle;
+
+            //Test
+            SceneTracker.UpdateScene();
         }
 
         //Handles removing static instance of ConsoleMenu

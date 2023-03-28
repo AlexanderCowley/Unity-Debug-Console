@@ -132,7 +132,7 @@ namespace RuntimeDebugger.Commands
                 {
                     continue;
                 }
-                //If the instance and monobehaviour pointer are the same
+                //If the instance and gameObject pointer are the same
                 //then add the commands to the CommandObject
                 if(Object.ReferenceEquals(instance, monoScript.gameObject))
                 {
@@ -192,6 +192,45 @@ namespace RuntimeDebugger.Commands
                 return;
             }
             new CommandObject(command, generatedKey, instance);
+        }
+        //Find similar object
+        //Add instance with copied objects
+        public static void CopyCommand(GameObject gameObject)
+        {
+            string instanceKey = gameObject.name;
+            List<ConsoleCommand> cmds = new List<ConsoleCommand>();
+            if(Commands.ContainsKey(instanceKey))
+            {
+                //Generate new commands based on list collection
+                cmds = new List<ConsoleCommand>(Commands[instanceKey].Commands);
+            }
+            //Iterate instanceKey
+            instanceKey = GenerateInstanceKey(gameObject);
+            //Generate new CommandObject
+            CommandObject newCommandObject = new CommandObject(
+                instanceKey, gameObject);
+            //Array of monobehaviours for gameobject
+            MonoBehaviour[] instanceMonos = gameObject.GetComponents<MonoBehaviour>();
+            for(int i = 0; i < instanceMonos.Length; i++)
+            {
+                MethodInfo[] methods = instanceMonos[i].GetType().GetMethods(BindingFlags.Public | 
+                BindingFlags.NonPublic | BindingFlags.Instance);
+                for(int k = 0; k < methods.Length; k++)
+                {
+                    if(cmds.Any())
+                        break;
+                    //Find methods with the AddCommandAttribute
+                    AddCommandAttribute attr = methods[k].GetCustomAttribute<AddCommandAttribute>();
+                    if(attr == null)
+                        continue;
+                    Delegate cmdDelegate = CreateDelegate(methods[k], instanceMonos[i]);
+                    cmds.Add(new ConsoleCommand(attr.CmdName, attr.CmdDesc, cmdDelegate));
+                    
+                }
+                for(int j = 0; j < cmds.Count; j++)
+                    newCommandObject.AddCommand(cmds[j], instanceMonos[i]);
+            }
+            
         }
         
         //Call in constructor
@@ -283,6 +322,44 @@ namespace RuntimeDebugger.Commands
             }
 
             //There is a <space(>
+            key = key.Substring(0, keyIndex);
+            while(Commands.ContainsKey($"{key}-{increment}"))
+            {
+                increment++;
+            }
+            return $"{key}-{increment}";
+        }
+
+        static string GenerateInstanceKey(GameObject gameObject)
+        {
+            if(gameObject == null)
+                return null;
+
+            string key = gameObject.name.ToLower();
+            if(Commands.ContainsKey(key))
+            {
+                Debug.LogWarning("Key already exists");
+                return null;
+            }
+            //Index to seperate the <(clone)> part of the name on prefabs
+            int keyIndex = key.IndexOf("(");
+            int increment = 1;
+
+            //A key exists within the dictionary that has no spaces
+            //If there is no space
+            if(keyIndex == -1)
+            {
+                if(!Commands.ContainsKey(key))
+                {
+                    //A key with no spaces and is not in the dictionary
+                    return key;
+                }
+
+                //A key with no spaces and is in the dictionary
+                return null;
+            }
+
+            //There is a <(clone)>
             key = key.Substring(0, keyIndex);
             while(Commands.ContainsKey($"{key}-{increment}"))
             {
