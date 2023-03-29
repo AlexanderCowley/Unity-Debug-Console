@@ -42,7 +42,6 @@ namespace RuntimeDebugger.Commands
         {
             InstanceKey = instanceKey;
             Instance = instance;
-            Debug.Log("Copy Generated " + InstanceKey);
             CommandManager.Commands.Add(InstanceKey, this);
         }
         

@@ -23,11 +23,9 @@ public static class SceneTracker
         //Check if the current transform count is equal to the last
         if(_currentScene.rootCount > _previousObjectCount)
         {
-            Debug.Log(_currentScene.rootCount - _previousObjectCount);
             _currentGameObjects = new GameObject[_currentScene.rootCount];
             _currentGameObjects = _currentScene.GetRootGameObjects();
             GameObject newGameObject = _currentGameObjects[_currentGameObjects.Length - 1];
-            Debug.Log(newGameObject.name);
             CommandManager.CopyCommand(newGameObject);
             //Adds one object to the count to keep updating
             ++_previousObjectCount;
