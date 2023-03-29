@@ -83,34 +83,41 @@ namespace RuntimeDebugger.Commands
                 }
             }
         }
-            //Retrieve attribute for attribute data from parameters
-            //Gather all methods with the AddCommand Attribute
-            //Create Instance of new command
-            //Create a new delegate the new command
-            //Add them to the dictionary using the <command><methodInfo>
+        //Retrieve attribute for attribute data from parameters
+        //Gather all methods with the AddCommand Attribute
+        //Create Instance of new command
+        //Create a new delegate the new command
+        //Add them to the dictionary using the <command><methodInfo>
 
-            static void GetUtilityCommands()
+        static void GetUtilityCommands()
+        {
+            //Get utility commands
+            var UtilityCommands = Assembly.
+                GetExecutingAssembly().GetType("RuntimeDebugger.Commands.UtilityCommands").
+                GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+            CommandObject staticCommands = new CommandObject(string.Empty);
+            for(int i = 0; i < UtilityCommands.Count(); i++)
             {
-                //Get utility commands
-                var UtilityCommands = Assembly.
-                    GetExecutingAssembly().GetType("RuntimeDebugger.Commands.UtilityCommands").
-                    GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-
-                CommandObject staticCommands = new CommandObject(string.Empty);
-
-                for(int i = 0; i < UtilityCommands.Count(); i++)
-                {
-                    _cmdAttr = UtilityCommands.ElementAt(i).
-                        GetCustomAttribute<AddCommandAttribute>();
-
-                    if(_cmdAttr == null)
-                        continue;
-                    
-                    Delegate cmd = CreateDelegate(UtilityCommands.ElementAt(i), null);
-                    staticCommands.AddCommand(new ConsoleCommand(_cmdAttr.CmdName, 
-                        _cmdAttr.CmdDesc, cmd), null);
-                }
+                _cmdAttr = UtilityCommands.ElementAt(i).
+                    GetCustomAttribute<AddCommandAttribute>();
+                if(_cmdAttr == null)
+                    continue;
+                
+                Delegate cmd = CreateDelegate(UtilityCommands.ElementAt(i), null);
+                staticCommands.AddCommand(new ConsoleCommand(_cmdAttr.CmdName, 
+                    _cmdAttr.CmdDesc, cmd), null);
             }
+        }
+        //Generates Delegates for unity functions like SetActive
+        static void GetUnityUtilityCommands(CommandObject cmdObj, MonoBehaviour monoScript)
+        {
+            //SetActive can be toggled on and off regardless of the objects active state
+            Delegate setActiveCmd = CreateDelegate(
+                monoScript.gameObject.GetType().GetMethod("SetActive"),
+                monoScript.gameObject);
+            cmdObj.AddCommand(new ConsoleCommand("SetActive", "Sets Active state of object", 
+                setActiveCmd), monoScript.gameObject);
+        }
 
         static void AddCommand(ConsoleCommand command, MonoBehaviour monoScript)
         {
@@ -150,7 +157,9 @@ namespace RuntimeDebugger.Commands
                 Debug.LogWarning("Duplicate Command Entered");
                 return;
             }
-            new CommandObject(command, generatedKey, monoScript);
+            
+            GetUnityUtilityCommands(new CommandObject(
+                command, generatedKey, monoScript), monoScript);
         }
 
         static void AddCommand(ConsoleCommand command, object instance)
@@ -321,7 +330,7 @@ namespace RuntimeDebugger.Commands
                 return null;
             }
 
-            //There is a <space(>
+            //There is a < (>
             key = key.Substring(0, keyIndex);
             while(Commands.ContainsKey($"{key}-{increment}"))
             {
